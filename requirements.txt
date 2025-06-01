@@ -1,0 +1,9 @@
+speechrecognition
+openai
+edge-tts
+playsound
+pyttsx3
+vosk
+pyaudio
+requests
+tk
