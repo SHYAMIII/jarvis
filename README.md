@@ -1,37 +1,43 @@
-🤖 Jarvis - Your Personal AI Voice Assistant
-Jarvis is a modular, Python-based AI voice assistant that uses state-of-the-art technologies to help you interact with your computer via voice. It supports real-time speech recognition, AI-powered responses using LLMs, text-to-speech, a GUI, and customizable features.
+# 🤖 Jarvis - AI Voice Assistant
 
-🚀 Features
-🎤 Voice Recognition (offline and real-time using Vosk)
+Jarvis is a modular, Python-based AI voice assistant that listens, understands, and responds to your voice using cutting-edge technologies like Vosk, OpenAI, Edge TTS, and more. It features speech recognition, text-to-speech, LLM integration, and a simple GUI—all fully customizable.
 
-🧠 AI-Driven Responses (via OpenAI, OpenRouter, or local LLM like Ollama)
+---
 
-🗣️ Realistic Text-to-Speech (Edge TTS with pyttsx3 fallback)
+## 🚀 Features
 
-🖥️ Simple GUI (Tkinter-based visual interface)
+- 🎙️ Real-time **Speech Recognition** with [Vosk](https://alphacephei.com/vosk/)
+- 🧠 **AI-generated responses** (OpenAI / OpenRouter / Ollama)
+- 🔊 **Text-to-Speech** with realistic Edge TTS and offline fallback (pyttsx3)
+- 🖥️ Simple **GUI Interface** with Tkinter
+- 🧩 Fully **modular code structure**
+- 🌐 **Socket.IO support** for remote or browser-based LLMs
 
-🧩 Modular Design (easy to extend and maintain)
+---
 
-🌐 Optional Internet Mode (connect to browser-based LLMs via Socket.IO)
+## 📁 Project Structure
 
-📂 Project Structure
-bash
-Copy
-Edit
 jarvis/
-├── main.py                 # Entry point
-├── voice/                  # Speech recognition (Vosk)
-├── tts/                    # Text-to-speech modules (EdgeTTS, pyttsx3)
-├── llm/                    # LLM interaction (OpenAI, local, or via Socket.IO)
-├── ui/                     # GUI code (Tkinter)
-├── utils/                  # Helper functions and constants
-├── requirements.txt        # Dependencies
+├── main.py # Project entry point
+├── voice/ # Vosk STT implementation
+├── tts/ # EdgeTTS and pyttsx3
+├── llm/ # OpenAI, OpenRouter, or local LLM
+├── ui/ # GUI with Tkinter
+├── utils/ # Constants and helpers
+├── requirements.txt
 └── README.md
-🛠️ Setup
-1. Clone the Repository
-bash
+
+yaml
 Copy
 Edit
+
+---
+
+## ⚙️ Setup
+
+### 1. Clone the Repo
+
+```bash
 git clone https://github.com/SHYAMIII/jarvis.git
 cd jarvis
 2. Create Virtual Environment
@@ -40,39 +46,30 @@ Copy
 Edit
 python -m venv venv
 venv\Scripts\activate  # On Windows
-3. Install Dependencies
+3. Install Requirements
 bash
 Copy
 Edit
 pip install -r requirements.txt
-4. (Optional) Download Vosk Model
-Download and extract a model from here, e.g., vosk-model-small-en-us-0.15.
+4. Download Vosk Model
+Download a model from Vosk models
+Extract it and place it in voice/models/.
 
-bash
-Copy
-Edit
-# Move model to voice/models/
 ▶️ Run the Assistant
 bash
 Copy
 Edit
 python main.py
+🔌 Real-Time LLM via Socket.IO
+For real-time browser-based LLM:
 
-🧠 How It Works
-Wake Word (Optional future enhancement)
+Start backend with Socket.IO
 
-Speech-to-Text using Vosk
+Run frontend client with WebSocket support (browser-based Ollama / OpenRouter)
 
-LLM Response generated via OpenAI or local model
+Jarvis will emit and receive live AI responses
 
-Text-to-Speech for reply via EdgeTTS or pyttsx3
-
-GUI displays transcription & response
-
-📸 Screenshots
-Coming soon...
-
-🧑‍💻 Author
-Shyam — Full Stack & AI Developer
+🙋 About Me
+👨‍💻 Shyam — Full Stack & AI Developer
 🔗 LinkedIn
 🌐 Portfolio
