@@ -9,6 +9,9 @@ import openai
 import time
 import asyncio
 import edge_tts
+import webrtcvad
+import pyaudio
+import numpy as np
 
 
 # genai.configure(api_key="AIzaSyC0YPn6sFaBzBVgJaKpltQGUng21AF_Dvg")  
@@ -92,52 +95,77 @@ def processCommand(command):
         print("AI says:", output)
         speak(output)
 
+# VAD and PyAudio setup
+vad = webrtcvad.Vad(2)  # Aggressiveness: 0-3
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 16000
+FRAME_DURATION = 30  # ms
+FRAME_SIZE = int(RATE * FRAME_DURATION / 1000)
+
+p = pyaudio.PyAudio()
+stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=FRAME_SIZE)
+
+def get_speech(timeout=5, phrase_time_limit=8):
+    """Listen for speech using VAD and return recognized text."""
+    frames = []
+    speech_started = False
+    silence_count = 0
+    max_silence = int(0.3 * 1000 / FRAME_DURATION)  # 300ms of silence
+    max_frames = int((phrase_time_limit * 1000) / FRAME_DURATION)
+    start_time = time.time()
+    while True:
+        if time.time() - start_time > timeout:
+            break
+        audio_data = stream.read(FRAME_SIZE, exception_on_overflow=False)
+        is_speech = vad.is_speech(audio_data, RATE)
+        if is_speech:
+            frames.append(audio_data)
+            speech_started = True
+            silence_count = 0
+        elif speech_started:
+            silence_count += 1
+            if silence_count > max_silence or len(frames) > max_frames:
+                break
+    if not frames:
+        return None
+    audio_bytes = b''.join(frames)
+    audio = sr.AudioData(audio_bytes, RATE, 2)
+    try:
+        text = recognizer.recognize_google(audio)
+        print("Recognized:", text)
+        return text
+    except sr.UnknownValueError:
+        print("Could not understand audio.")
+        return None
+    except sr.RequestError as e:
+        print(f"Speech recognition error: {e}")
+        return None
+
 # Main Jarvis loop
 if __name__ == "__main__":
     speak("Initializing Jarvis...")
 
     while True:
         try:
-            with sr.Microphone() as source:
-                print("Listening for wake word...")
-                recognizer.adjust_for_ambient_noise(source, duration=0.5)
-                audio = recognizer.listen(source, timeout=3, phrase_time_limit=2)
-
-            try:
-                word = recognizer.recognize_google(audio)
+            print("Listening for wake word...")
+            word = get_speech(timeout=3, phrase_time_limit=2)
+            if word:
                 print(f"Detected: {word}")
-
                 if "jarvis" in word.lower():
                     speak("Welcome Shyam, how can I assist you?")
                     time.sleep(0.5)
-
                     while True:
-                        with sr.Microphone() as source:
-                            print("Listening for command...")
-                            recognizer.adjust_for_ambient_noise(source, duration=0.5)
-                            try:
-                                command_audio = recognizer.listen(source, timeout=5, phrase_time_limit=8)
-                                command = recognizer.recognize_google(command_audio)
-                                print("Command:", command)
-
-                                if any(exit_word in command.lower() for exit_word in ["exit", "quit", "stop", "goodbye", "go to sleep"]):
-                                    speak("Okay, going back to sleep.")
-                                    break
-
-                                processCommand(command)
-                            except sr.UnknownValueError:
-                                speak("Sorry, I didn't catch that. Please repeat.")
-                            except sr.RequestError as e:
-                                speak(f"Speech recognition error: {e}")
-
-
-            except sr.UnknownValueError:
-                print("Could not understand audio.")
-            except sr.RequestError as e:
-                print(f"Speech service error: {e}")
-            except Exception as e:
-                print(f"General Error: {e}")
-
+                        print("Listening for command...")
+                        command = get_speech(timeout=5, phrase_time_limit=8)
+                        if command:
+                            print("Command:", command)
+                            if any(exit_word in command.lower() for exit_word in ["exit", "quit", "stop", "goodbye", "go to sleep"]):
+                                speak("Okay, going back to sleep.")
+                                break
+                            processCommand(command)
+                        else:
+                            speak("Sorry, I didn't catch that. Please repeat.")
         except KeyboardInterrupt:
             print("\n[INFO] Exiting gracefully.")
             speak("Shutting down Jarvis.")
